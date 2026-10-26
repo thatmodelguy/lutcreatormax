@@ -1,24 +1,41 @@
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace LutCreatorMax.Core;
 
-/// <summary>Parses Adobe .cube 3D LUTs and resamples to 16^3.</summary>
+public sealed class CubeLutLoadResult
+{
+    public required Lut3D Lut { get; init; }
+    public string? Title { get; init; }
+    public int SourceSize { get; init; }
+}
+
+/// <summary>Parses Adobe / Photoshop .cube 3D LUTs and resamples to 16^3 for Max.</summary>
 public static class CubeLutReader
 {
-    public static Lut3D Load(string path)
+    public static Lut3D Load(string path) => LoadDetailed(path).Lut;
+
+    public static CubeLutLoadResult LoadDetailed(string path)
     {
         var lines = File.ReadAllLines(path);
         int size = 0;
+        string? title = null;
         var values = new List<Rgb>();
 
         foreach (var raw in lines)
         {
             var line = raw.Trim();
-            if (line.Length == 0 || line.StartsWith('#') || line.StartsWith("TITLE", StringComparison.OrdinalIgnoreCase))
+            if (line.Length == 0 || line.StartsWith('#'))
                 continue;
+
+            if (line.StartsWith("TITLE", StringComparison.OrdinalIgnoreCase))
+            {
+                title = ParseTitle(line);
+                continue;
+            }
             if (line.StartsWith("LUT_1D_SIZE", StringComparison.OrdinalIgnoreCase))
-                throw new NotSupportedException("1D .cube LUTs are not supported; use a 3D .cube.");
+                throw new NotSupportedException("1D .cube LUTs are not supported; export a 3D Color Lookup (.CUBE) from Photoshop.");
             if (line.StartsWith("LUT_3D_SIZE", StringComparison.OrdinalIgnoreCase))
             {
                 string[] tokens = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
@@ -45,15 +62,37 @@ public static class CubeLutReader
         if (values.Count < expected)
             throw new InvalidDataException($"Expected {expected} RGB triples, found {values.Count}.");
 
+        Lut3D lut;
         if (size == Lut3D.Size)
         {
             var data = new Rgb[Lut3D.EntryCount];
             for (int i = 0; i < Lut3D.EntryCount; i++)
                 data[i] = values[i];
-            return new Lut3D(data);
+            lut = new Lut3D(data);
+        }
+        else
+        {
+            lut = Resample(values, size);
         }
 
-        return Resample(values, size);
+        return new CubeLutLoadResult
+        {
+            Lut = lut,
+            Title = title,
+            SourceSize = size
+        };
+    }
+
+    private static string? ParseTitle(string line)
+    {
+        // TITLE "Going for a walk"  or  TITLE Going for a walk
+        var match = Regex.Match(line, "^TITLE\\s+\"([^\"]*)\"\\s*$", RegexOptions.IgnoreCase);
+        if (match.Success)
+            return match.Groups[1].Value.Trim();
+
+        int idx = line.IndexOf(' ');
+        if (idx < 0) return null;
+        return line[(idx + 1)..].Trim().Trim('"');
     }
 
     private static Lut3D Resample(List<Rgb> source, int size)

@@ -28,7 +28,7 @@ Requires .NET 8 SDK (or newer with `net8.0-windows` targeting pack).
 ## Workflow
 
 1. **Open Image** — any PNG/JPG from your project or elsewhere (swap indoor/outdoor refs anytime).
-2. Pick a **preset** or adjust grade sliders; optionally **Import LUT** (Unreal 256×16 PNG or `.cube`).
+2. Pick a **preset** or adjust grade sliders; or **Import Photoshop / LUT…** — Photoshop/Adobe `.CUBE` (any size, e.g. 32³) is resampled to Max’s 16³ strip, or load an Unreal 256×16 PNG.
 3. Preview with After / Before / Split; the live strip shows the baked 256×16 LUT.
 4. Set **Display name** and a sort-friendly **File name** (prefer `z_…` so it appends at the end of Max’s alphabetical list).
 5. **Export Package…** writes PNG + thumbnail + a `filternames_append.txt` snippet, or **Install to Max…** appends into the Max folder (may need admin rights under Program Files).
@@ -50,5 +50,5 @@ Remembers Max path, last image/import/export folders, file-name prefix, and prev
 
 ## Notes
 
-- Installing mid-alphabet names can shift Max’s Filter index mapping for later entries; the app warns when that would happen.
+- **Install to Max** auto-picks an append-safe filename (`zz_NNN_name.png`) when needed so new LUTs always sort last and Filter indices stay aligned with `filternames.txt`.
 - If Program Files is not writable, use Export Package and copy the files manually (or run elevated).

@@ -232,7 +232,7 @@
                 <ToolBarTray Background="Transparent" VerticalAlignment="Center">
                     <ToolBar Background="Transparent" Band="1">
                         <Button Content="Open Image" Click="OpenImage_Click"/>
-                        <Button Content="Import LUT" Click="ImportLut_Click"/>
+                        <Button Content="Import Photoshop / LUT…" Click="ImportLut_Click"/>
                         <Button Content="Clear Import" Click="ClearImport_Click"/>
                         <Separator/>
                         <Button Content="Reset Grade" Click="ResetGrade_Click"/>

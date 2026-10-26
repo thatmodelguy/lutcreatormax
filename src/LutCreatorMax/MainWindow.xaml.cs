@@ -319,8 +319,12 @@ public partial class MainWindow : Window
     {
         var dlg = new OpenFileDialog
         {
-            Title = "Import LUT (Unreal strip PNG or .cube)",
-            Filter = "LUT files|*.png;*.cube|Unreal strip PNG|*.png|Adobe Cube|*.cube|All files|*.*"
+            Title = "Import Photoshop .CUBE or Unreal strip PNG",
+            Filter =
+                "Photoshop / Adobe Cube (*.cube)|*.cube;*.CUBE|" +
+                "Unreal / Max strip PNG|*.png|" +
+                "All LUT files|*.cube;*.CUBE;*.png|" +
+                "All files|*.*"
         };
         if (!string.IsNullOrWhiteSpace(_settings.LastLutImportFolder) && Directory.Exists(_settings.LastLutImportFolder))
             dlg.InitialDirectory = _settings.LastLutImportFolder;
@@ -333,17 +337,38 @@ public partial class MainWindow : Window
         try
         {
             string ext = Path.GetExtension(dlg.FileName).ToLowerInvariant();
-            _importedLut = ext switch
+            string label;
+            if (ext == ".cube")
             {
-                ".cube" => CubeLutReader.Load(dlg.FileName),
-                ".png" => LutStrip.FromFile(dlg.FileName),
-                _ => throw new NotSupportedException("Use a 256×16 PNG strip or a .cube file.")
-            };
+                var loaded = CubeLutReader.LoadDetailed(dlg.FileName);
+                _importedLut = loaded.Lut;
+                string title = !string.IsNullOrWhiteSpace(loaded.Title)
+                    ? loaded.Title!
+                    : Path.GetFileNameWithoutExtension(dlg.FileName);
+                _grade.DisplayName = title;
+                string prefix = FilePrefixBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(prefix)) prefix = "z_";
+                if (!prefix.EndsWith('_')) prefix += "_";
+                _grade.FileName = prefix + SanitizeStem(title);
+                _grade.ImportStrength = 1f;
+                label = $"{Path.GetFileName(dlg.FileName)} ({loaded.SourceSize}³ → 16³ Max)";
+                StatusText.Text = $"Imported Photoshop/Adobe cube → Max strip ready: {title}";
+            }
+            else if (ext == ".png")
+            {
+                _importedLut = LutStrip.FromFile(dlg.FileName);
+                label = Path.GetFileName(dlg.FileName);
+                if (string.IsNullOrWhiteSpace(_grade.DisplayName) || _grade.DisplayName == "My LUT")
+                    _grade.DisplayName = Path.GetFileNameWithoutExtension(dlg.FileName);
+                StatusText.Text = $"Imported strip LUT: {Path.GetFileName(dlg.FileName)}";
+            }
+            else
+            {
+                throw new NotSupportedException("Use a Photoshop/Adobe .CUBE (3D) or a 256×16 Unreal/Max PNG strip.");
+            }
+
             _settings.LastLutImportFolder = Path.GetDirectoryName(dlg.FileName);
-            ImportLabel.Text = Path.GetFileName(dlg.FileName);
-            if (string.IsNullOrWhiteSpace(_grade.DisplayName) || _grade.DisplayName == "My LUT")
-                _grade.DisplayName = Path.GetFileNameWithoutExtension(dlg.FileName);
-            StatusText.Text = $"Imported LUT: {Path.GetFileName(dlg.FileName)}";
+            ImportLabel.Text = label;
             RefreshPreview();
         }
         catch (Exception ex)
@@ -423,32 +448,28 @@ public partial class MainWindow : Window
         {
             EnsureExportReady();
             string lutFolder = MaxPathBox.Text.Trim();
-            string safe = MaxExportService.SanitizeFileName(_grade.FileName);
+            string assigned = MaxExportService.EnsureAppendFriendlyFileName(lutFolder, _grade.FileName);
+            bool renamed = !string.Equals(
+                MaxExportService.SanitizeFileName(_grade.FileName),
+                assigned,
+                StringComparison.OrdinalIgnoreCase);
 
-            if (MaxExportService.WouldInsertMidList(lutFolder, safe))
-            {
-                var warn = MessageBox.Show(this,
-                    $"'{safe}' sorts before the last existing LUT PNG.\n" +
-                    "That can shift Max's Filter index mapping for later entries.\n\n" +
-                    "Prefer a name that sorts last (e.g. z_mylut).\n\nContinue anyway?",
-                    "Sort order warning",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-                if (warn != MessageBoxResult.Yes)
-                    return;
-            }
+            string confirmMsg = renamed
+                ? $"Install '{_grade.DisplayName}' into:\n{lutFolder}\n\n" +
+                  $"File will be auto-named:\n{assigned}\n\n" +
+                  "(Keeps Max's alphabetical Filter order correct.)"
+                : $"Install '{_grade.DisplayName}' into:\n{lutFolder}\n\nas {assigned}?";
 
-            var confirm = MessageBox.Show(this,
-                $"Install '{_grade.DisplayName}' into:\n{lutFolder}\n\nas {safe}?",
-                "Install to Max",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+            var confirm = MessageBox.Show(this, confirmMsg, "Install to Max",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes)
                 return;
 
             using var graded = BuildGradedForExport();
             var result = MaxExportService.InstallToMax(
                 _workingLut, graded, lutFolder, _grade.FileName, _grade.DisplayName);
+            if (!string.IsNullOrWhiteSpace(result.AssignedFileName))
+                _grade.FileName = Path.GetFileNameWithoutExtension(result.AssignedFileName);
             StatusText.Text = result.Message ?? "Installed.";
             RefreshCatalogStatus();
             MessageBox.Show(this, result.Message, "Installed", MessageBoxButton.OK, MessageBoxImage.Information);
