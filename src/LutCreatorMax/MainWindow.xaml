@@ -1,0 +1,414 @@
+﻿<Window x:Class="LutCreatorMax.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="LUT Creator for GameGuru MAX"
+        Height="820" Width="1280"
+        MinHeight="640" MinWidth="1000"
+        Background="#121212"
+        Foreground="#39FF14"
+        Icon="Assets/AppIcon.ico">
+    <Window.Resources>
+        <SolidColorBrush x:Key="MatrixGreen" Color="#39FF14"/>
+        <SolidColorBrush x:Key="MatrixGreenDim" Color="#2BD40F"/>
+        <SolidColorBrush x:Key="PanelBg" Color="#1A1A1A"/>
+        <SolidColorBrush x:Key="ControlBg" Color="#222"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="Margin" Value="0,2,0,2"/>
+        </Style>
+
+        <!-- Normal buttons -->
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Background" Value="{StaticResource ControlBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="BorderBrush" Value="#39FF14"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="2"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2A3A2A"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1A2A1A"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#1A6B0A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ToolBar ignores TargetType=Button; must use ToolBar.ButtonStyleKey -->
+        <Style x:Key="{x:Static ToolBar.ButtonStyleKey}" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Margin" Value="2,2,4,2"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style TargetType="Slider">
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+        </Style>
+        <Style TargetType="GroupBox">
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="BorderBrush" Value="#2A6B1A"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="6"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource ControlBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="BorderBrush" Value="#2A6B1A"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="SelectionBrush" Value="#1A6B0A"/>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style TargetType="StatusBar">
+            <Setter Property="Foreground" Value="{StaticResource MatrixGreen}"/>
+            <Setter Property="Background" Value="#151515"/>
+        </Style>
+        <Style TargetType="Separator">
+            <Setter Property="Background" Value="#2A6B1A"/>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="#39FF14"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#2A3A2A"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1A4A1A"/>
+                                <Setter Property="Foreground" Value="#39FF14"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#1A6B0A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#222"/>
+            <Setter Property="Foreground" Value="#39FF14"/>
+            <Setter Property="BorderBrush" Value="#2A6B1A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="DropBorder"
+                                                Background="#222"
+                                                BorderBrush="#2A6B1A"
+                                                BorderThickness="1"
+                                                CornerRadius="2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="22"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Background="Transparent"/>
+                                                <Path Grid.Column="1"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Data="M 0 0 L 6 6 L 12 0 Z"
+                                                      Fill="#39FF14"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="DropBorder" Property="Background" Value="#2A3A2A"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite"
+                                              IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="8,4,26,4"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#39FF14"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                            <Popup x:Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="#1A1A1A"
+                                            BorderBrush="#39FF14"
+                                            BorderThickness="1">
+                                        <ScrollViewer Margin="2" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="False">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="40"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#39FF14"/>
+            <Setter Property="Margin" Value="0,4,0,6"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#151515" BorderBrush="#2A6B1A" BorderThickness="0,0,0,1" Padding="8,6">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Image Source="Assets/AppLogo.png" Width="40" Height="40" Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,10,0"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="LUT Creator" FontSize="16" FontWeight="Bold" Margin="0"/>
+                        <TextBlock Text="for GameGuru MAX" FontSize="11" Foreground="#2BD40F" Margin="0"/>
+                    </StackPanel>
+                </StackPanel>
+                <ToolBarTray Background="Transparent" VerticalAlignment="Center">
+                    <ToolBar Background="Transparent" Band="1">
+                        <Button Content="Open Image" Click="OpenImage_Click"/>
+                        <Button Content="Import LUT" Click="ImportLut_Click"/>
+                        <Button Content="Clear Import" Click="ClearImport_Click"/>
+                        <Separator/>
+                        <Button Content="Reset Grade" Click="ResetGrade_Click"/>
+                        <Separator/>
+                        <Button Content="Export Package…" Click="ExportPackage_Click"/>
+                        <Button Content="Install to Max…" Click="InstallToMax_Click"/>
+                        <Separator/>
+                        <Button Content="Browse Max Path…" Click="BrowseMaxPath_Click"/>
+                    </ToolBar>
+                </ToolBarTray>
+            </DockPanel>
+        </Border>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusText" Text="Open an image to begin." Foreground="#39FF14"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="CatalogText" Text="" Foreground="#39FF14"/>
+            </StatusBarItem>
+        </StatusBar>
+
+        <Grid Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Preview -->
+            <Border Grid.Column="0" Background="#0A0A0A" BorderBrush="#2A6B1A" BorderThickness="1">
+                <Grid>
+                    <Image x:Name="PreviewImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock x:Name="PreviewPlaceholder"
+                               Text="Open an image to preview the LUT"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Foreground="#2BD40F" FontSize="16"/>
+                </Grid>
+            </Border>
+
+            <!-- Strip + mode -->
+            <DockPanel Grid.Column="2">
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <TextBlock Text="Preview mode" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                        <RadioButton x:Name="ModeAfter" Content="After" IsChecked="True" Checked="PreviewMode_Changed"/>
+                        <RadioButton x:Name="ModeBefore" Content="Before" Checked="PreviewMode_Changed"/>
+                        <RadioButton x:Name="ModeSplit" Content="Split" Checked="PreviewMode_Changed"/>
+                    </StackPanel>
+                    <TextBlock Text="LUT strip (256×16)" FontWeight="SemiBold"/>
+                </StackPanel>
+                <Border Background="#0A0A0A" BorderBrush="#2A6B1A" BorderThickness="1" VerticalAlignment="Top" Height="48">
+                    <Image x:Name="StripImage" Stretch="Fill" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                </Border>
+            </DockPanel>
+
+            <!-- Controls -->
+            <ScrollViewer Grid.Column="4" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <GroupBox Header="Presets">
+                        <StackPanel>
+                            <ComboBox x:Name="PresetCombo"
+                                      DisplayMemberPath="DisplayLabel"
+                                      SelectionChanged="PresetCombo_SelectionChanged"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Save Preset…" Click="SavePreset_Click"/>
+                                <Button Content="Delete Preset" Click="DeletePreset_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Export identity">
+                        <StackPanel>
+                            <TextBlock Text="Display name"/>
+                            <TextBox x:Name="DisplayNameBox" Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="File name (prefix remembered in settings)"/>
+                            <TextBox x:Name="FileNameBox" Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="Default file prefix"/>
+                            <TextBox x:Name="FilePrefixBox" TextChanged="SettingsField_Changed"/>
+                            <TextBlock Text="Max LUT folder"/>
+                            <TextBox x:Name="MaxPathBox" TextChanged="MaxPathBox_TextChanged"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Look">
+                        <StackPanel>
+                            <TextBlock Text="Look strength"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding LookStrength}" TickFrequency="0.01"/>
+                            <CheckBox Content="Invert" IsChecked="{Binding Invert}"/>
+                            <TextBlock Text="Vignette (preview only — not in Max LUT)"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding Vignette}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Import">
+                        <StackPanel>
+                            <TextBlock x:Name="ImportLabel" Text="No imported LUT"/>
+                            <TextBlock Text="Import strength"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding ImportStrength}" TickFrequency="0.01" IsSnapToTickEnabled="False"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Basic">
+                        <StackPanel>
+                            <TextBlock Text="Exposure"/>
+                            <Slider Minimum="-2" Maximum="2" Value="{Binding Exposure}" TickFrequency="0.01"/>
+                            <TextBlock Text="Contrast"/>
+                            <Slider Minimum="0" Maximum="2" Value="{Binding Contrast}" TickFrequency="0.01"/>
+                            <TextBlock Text="Saturation"/>
+                            <Slider Minimum="0" Maximum="2" Value="{Binding Saturation}" TickFrequency="0.01"/>
+                            <TextBlock Text="Temperature"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding Temperature}" TickFrequency="0.01"/>
+                            <TextBlock Text="Tint"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding Tint}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Lift / Gamma / Gain">
+                        <StackPanel>
+                            <TextBlock Text="Lift R / G / B"/>
+                            <Slider Minimum="-0.5" Maximum="0.5" Value="{Binding LiftR}" TickFrequency="0.01"/>
+                            <Slider Minimum="-0.5" Maximum="0.5" Value="{Binding LiftG}" TickFrequency="0.01"/>
+                            <Slider Minimum="-0.5" Maximum="0.5" Value="{Binding LiftB}" TickFrequency="0.01"/>
+                            <TextBlock Text="Gamma R / G / B"/>
+                            <Slider Minimum="0.2" Maximum="2.5" Value="{Binding GammaR}" TickFrequency="0.01"/>
+                            <Slider Minimum="0.2" Maximum="2.5" Value="{Binding GammaG}" TickFrequency="0.01"/>
+                            <Slider Minimum="0.2" Maximum="2.5" Value="{Binding GammaB}" TickFrequency="0.01"/>
+                            <TextBlock Text="Gain R / G / B"/>
+                            <Slider Minimum="0" Maximum="2" Value="{Binding GainR}" TickFrequency="0.01"/>
+                            <Slider Minimum="0" Maximum="2" Value="{Binding GainG}" TickFrequency="0.01"/>
+                            <Slider Minimum="0" Maximum="2" Value="{Binding GainB}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Tone / curves">
+                        <StackPanel>
+                            <TextBlock Text="Shadows / Midtones / Highlights"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding Shadows}" TickFrequency="0.01"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding Midtones}" TickFrequency="0.01"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding Highlights}" TickFrequency="0.01"/>
+                            <TextBlock Text="S-curve"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding SCurve}" TickFrequency="0.01"/>
+                            <TextBlock Text="Curve R / G / B"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding CurveR}" TickFrequency="0.01"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding CurveG}" TickFrequency="0.01"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding CurveB}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Crush / fade / roll-off">
+                        <StackPanel>
+                            <TextBlock Text="Black crush"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding BlackCrush}" TickFrequency="0.01"/>
+                            <TextBlock Text="Highlight roll-off"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding HighlightRolloff}" TickFrequency="0.01"/>
+                            <TextBlock Text="Fade"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding Fade}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Split toning">
+                        <StackPanel>
+                            <TextBlock Text="Shadow hue (°) / sat"/>
+                            <Slider Minimum="0" Maximum="360" Value="{Binding SplitShadowHue}" TickFrequency="1"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding SplitShadowSat}" TickFrequency="0.01"/>
+                            <TextBlock Text="Highlight hue (°) / sat"/>
+                            <Slider Minimum="0" Maximum="360" Value="{Binding SplitHighlightHue}" TickFrequency="1"/>
+                            <Slider Minimum="0" Maximum="1" Value="{Binding SplitHighlightSat}" TickFrequency="0.01"/>
+                            <TextBlock Text="Balance (shadows ← → highlights)"/>
+                            <Slider Minimum="-1" Maximum="1" Value="{Binding SplitBalance}" TickFrequency="0.01"/>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>
